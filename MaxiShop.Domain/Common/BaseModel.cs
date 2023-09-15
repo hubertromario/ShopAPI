@@ -13,5 +13,8 @@ namespace MaxiShop.Domain.Common
         public int Id { get; set; }
 
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+
+
+        //to check that it is pushed into github
     }
 }
