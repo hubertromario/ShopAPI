@@ -1,4 +1,7 @@
-﻿using MaxiShop.Domain.Models;
+﻿using MaxiShop.Application.DTO.Category;
+using MaxiShop.Application.Services.Interfaces;
+using MaxiShop.Domain.Contracts;
+using MaxiShop.Domain.Models;
 using MaxiShop.InfraStructure.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,18 +11,17 @@ namespace MaxiShop.Web.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        public readonly MaxiShopDbContext _dbContext;
-
-        public CategoryController(MaxiShopDbContext dbContext)
+        public readonly ICategoryService _categoryService;
+        public CategoryController(ICategoryService categoryService)
         {
-            _dbContext = dbContext;
+            _categoryService = categoryService;
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpGet]
-        public ActionResult Get()
+        public async Task<ActionResult> Get()
         {
-            var categories = _dbContext.Category.ToList();
+            var categories = await _categoryService.GetAllAsync();
             return Ok(categories);
         }
 
@@ -27,14 +29,14 @@ namespace MaxiShop.Web.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPost]
-        public ActionResult Create([FromBody]Category category)
+        public async Task<ActionResult> Create([FromBody]CreateCategoryDTO dto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            _dbContext.Category.Add(category);
-            _dbContext.SaveChanges();
+            var entity = await _categoryService.CreateAsync(dto);
+            
             return Ok();
         }
 
@@ -42,9 +44,9 @@ namespace MaxiShop.Web.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet]
         [Route("Details")]
-        public ActionResult Get(int id)
+        public async Task<ActionResult> Get(int id)
         {
-            var category = _dbContext.Category.FirstOrDefault(x => x.Id == id);
+            var category = await _categoryService.GetByIdAsync(id);
             if (category == null)
             {
                 return NotFound($"Category Not Found for Id - {id}");
@@ -56,14 +58,14 @@ namespace MaxiShop.Web.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPut]
-        public ActionResult Update([FromBody] Category category)
+        public async Task<ActionResult> Update([FromBody] UpdateCategoryDTO categorydto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            _dbContext.Category.Update(category);
-            _dbContext.SaveChanges();
+            await _categoryService.UpdateAsync(categorydto);
+
             return NoContent();
         }
 
@@ -71,19 +73,18 @@ namespace MaxiShop.Web.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpDelete]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             if (id==0)
             {
                 return BadRequest();
             }
-            var category = _dbContext.Category.FirstOrDefault(x => x.Id == id);
+            var category = await _categoryService.GetByIdAsync(id);
             if (category == null)
             {
                 return NotFound("Category doesnot exists");
             }
-            _dbContext.Category.Remove(category);
-            _dbContext.SaveChanges();
+            await _categoryService.DeleteAsync(id);
             return NoContent();
         }
 

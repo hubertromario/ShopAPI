@@ -16,7 +16,7 @@ namespace MaxiShop.InfraStructure.Repositories
 
         }
 
-        public async Task Update(Category category)
+        public async Task UpdateAsync(Category category)
         {
             _dbContext.Update(category);
             await _dbContext.SaveChangesAsync();
