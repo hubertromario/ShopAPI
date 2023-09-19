@@ -1,10 +1,7 @@
 ﻿using MaxiShop.Application.ApplicationConstants;
 using MaxiShop.Application.Common;
-using MaxiShop.Application.DTO.Category;
+using MaxiShop.Application.DTO.Brand;
 using MaxiShop.Application.Services.Interfaces;
-using MaxiShop.Domain.Contracts;
-using MaxiShop.Domain.Models;
-using MaxiShop.InfraStructure.DbContexts;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -12,14 +9,14 @@ namespace MaxiShop.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : ControllerBase
+    public class BrandController : ControllerBase
     {
-        public readonly ICategoryService _categoryService;
+        public readonly IBrandService _BrandService;
         protected APIResponse _response;
 
-        public CategoryController(ICategoryService categoryService)
+        public BrandController(IBrandService BrandService)
         {
-            _categoryService = categoryService;
+            _BrandService = BrandService;
             _response = new APIResponse();
         }
 
@@ -27,8 +24,9 @@ namespace MaxiShop.Web.Controllers
         [HttpGet]
         public async Task<ActionResult<APIResponse>> Get()
         {
-            try {
-                var categories = await _categoryService.GetAllAsync();
+            try
+            {
+                var categories = await _BrandService.GetAllAsync();
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.IsSuccess = true;
                 _response.Result = categories;
@@ -38,14 +36,14 @@ namespace MaxiShop.Web.Controllers
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.AddError(CommonMessage.systemError);
             }
-             return Ok(_response);
+            return Ok(_response);
 
         }
 
-        
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPost]
-        public async Task<ActionResult<APIResponse>> Create([FromBody]CreateCategoryDTO dto)
+        public async Task<ActionResult<APIResponse>> Create([FromBody] CreateBrandDTO dto)
         {
             try
             {
@@ -54,11 +52,11 @@ namespace MaxiShop.Web.Controllers
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.DisplayMessage = CommonMessage.createOperationFailed;
                     _response.AddError(ModelState.ToString());
-                    return Ok(_response);   
+                    return Ok(_response);
                 }
                 else
                 {
-                    var entity = await _categoryService.CreateAsync(dto);
+                    var entity = await _BrandService.CreateAsync(dto);
                     _response.StatusCode = HttpStatusCode.Created;
                     _response.DisplayMessage = CommonMessage.createOperationSuccess;
                     _response.IsSuccess = true;
@@ -84,10 +82,10 @@ namespace MaxiShop.Web.Controllers
         {
             try
             {
-                var category = await _categoryService.GetByIdAsync(id);
-                if (category == null)
+                var Brand = await _BrandService.GetByIdAsync(id);
+                if (Brand == null)
                 {
-                    _response.StatusCode =HttpStatusCode.NotFound;
+                    _response.StatusCode = HttpStatusCode.NotFound;
                     _response.DisplayMessage = CommonMessage.recordNotFound;
 
                     return Ok(_response);
@@ -97,7 +95,7 @@ namespace MaxiShop.Web.Controllers
                 {
                     _response.StatusCode = HttpStatusCode.OK;
                     _response.IsSuccess = true;
-                    _response.Result = category;
+                    _response.Result = Brand;
                 }
             }
             catch (Exception)
@@ -113,9 +111,10 @@ namespace MaxiShop.Web.Controllers
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPut]
-        public async Task<ActionResult<APIResponse>> Update([FromBody] UpdateCategoryDTO categorydto)
+        public async Task<ActionResult<APIResponse>> Update([FromBody] UpdateBrandDTO Branddto)
         {
-            try {
+            try
+            {
                 if (!ModelState.IsValid)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
@@ -123,14 +122,14 @@ namespace MaxiShop.Web.Controllers
                     _response.AddError(ModelState.ToString());
                     return Ok(_response);
                 }
-                var category = await _categoryService.GetByIdAsync(categorydto.Id);
-                if (category == null)
+                var Brand = await _BrandService.GetByIdAsync(Branddto.Id);
+                if (Brand == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     _response.DisplayMessage = CommonMessage.updateOperationFailed;
                 }
 
-                await _categoryService.UpdateAsync(categorydto);
+                await _BrandService.UpdateAsync(Branddto);
 
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
@@ -151,21 +150,22 @@ namespace MaxiShop.Web.Controllers
         [HttpDelete]
         public async Task<ActionResult<APIResponse>> Delete(int id)
         {
-            try {
+            try
+            {
                 if (id == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     _response.DisplayMessage = CommonMessage.deleteOperationFailed;
                     return Ok(_response);
                 }
-                var category = await _categoryService.GetByIdAsync(id);
-                if (category == null)
+                var Brand = await _BrandService.GetByIdAsync(id);
+                if (Brand == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
                     _response.DisplayMessage = CommonMessage.deleteOperationFailed;
                     return Ok(_response);
                 }
-                await _categoryService.DeleteAsync(id);
+                await _BrandService.DeleteAsync(id);
 
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.IsSuccess = true;

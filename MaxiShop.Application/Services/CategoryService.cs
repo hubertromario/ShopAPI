@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace MaxiShop.Application.Services
 {
-    internal class CategoryService : ICategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;

@@ -1,6 +1,7 @@
 ﻿using MaxiShop.Application.Common;
 using MaxiShop.Application.Services;
 using MaxiShop.Application.Services.Interfaces;
+using MaxiShop.Domain.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace MaxiShop.Application
         {
             services.AddAutoMapper(typeof(MappingProfile));
             services.AddScoped<ICategoryService, CategoryService>();
-
+            services.AddScoped<IBrandService, BrandService>();
             return services;
         }
     }
