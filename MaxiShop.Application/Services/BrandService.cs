@@ -2,9 +2,11 @@
 using MaxiShop.Application.DTO.Brand;
 using MaxiShop.Application.DTO.Brand;
 using MaxiShop.Application.DTO.Category;
+using MaxiShop.Application.Exceptions;
 using MaxiShop.Application.Services.Interfaces;
 using MaxiShop.Domain.Contracts;
 using MaxiShop.Domain.Models;
+using Microsoft.AspNetCore.Http.Features;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +28,15 @@ namespace MaxiShop.Application.Services
 
         public async Task<BrandDTO> CreateAsync(CreateBrandDTO CreateBrandDto)
         {
+
+            var validator = new CreateBrandDTOValidator();
+            var validationResult = await validator.ValidateAsync(CreateBrandDto);
+
+            if (validationResult.Errors.Any())
+            {
+                throw new BadRequestException("Invalid Brand",validationResult);
+            }
+
             var Brand = _mapper.Map<Brand>(CreateBrandDto);
             var createdentity = await _BrandRepository.CreateAsync(Brand);
             var entity = _mapper.Map<BrandDTO>(createdentity);  // converting Brand into Brand dto

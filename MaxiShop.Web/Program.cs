@@ -3,6 +3,9 @@ using MaxiShop.InfraStructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using MaxiShop.Application;
 using MaxiShop.InfraStructure.Common;
+using MaxiShop.Web.MiddleWare;
+using Microsoft.AspNetCore.Identity;
+using MaxiShop.Application.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,12 @@ builder.Services.AddCors(options=>
 builder.Services.AddDbContext<MaxiShopDbContext>(
     options=>options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedEmail = false;
+    options.User.RequireUniqueEmail = true;
+}).AddEntityFrameworkStores<MaxiShopDbContext>();
 #endregion
 #region Configuration for Seeding Data to Database
 static async void UpdateDatabaseAsync(IHost host)
@@ -52,8 +61,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionMiddleware>();
 
 UpdateDatabaseAsync(app);
+
+var serviceProvider = app.Services;
+await SeedData.SeedRoles(serviceProvider);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -63,6 +76,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("CustomPolicy");
+
+
 
 app.UseHttpsRedirection();
 
