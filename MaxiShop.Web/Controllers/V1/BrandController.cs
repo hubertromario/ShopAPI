@@ -6,13 +6,15 @@ using MaxiShop.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace MaxiShop.Web.Controllers
+namespace MaxiShop.Web.Controllers.V1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class BrandController : ControllerBase
     {
         public readonly IBrandService _BrandService;
+        public readonly ILogger<BrandController> _logger;
         protected APIResponse _response;
 
         public BrandController(IBrandService BrandService)
@@ -22,6 +24,7 @@ namespace MaxiShop.Web.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ResponseCache(Duration =60)]
         [HttpGet]
         public async Task<ActionResult<APIResponse>> Get()
         {
@@ -31,9 +34,12 @@ namespace MaxiShop.Web.Controllers
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.IsSuccess = true;
                 _response.Result = brands;
+
+                _logger.LogInformation("Records fetched");
             }
             catch (Exception)
             {
+                _logger.LogError("brand controller get Function Failed");
                 _response.StatusCode = HttpStatusCode.InternalServerError;
                 _response.AddError(CommonMessage.systemError);
             }
